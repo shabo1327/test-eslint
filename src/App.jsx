@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
+const { ESLint } = require('eslint');
 
 function App() {
   let f; const a = 0;
