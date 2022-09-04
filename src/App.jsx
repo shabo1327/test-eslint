@@ -3,6 +3,9 @@ import reactLogo from './assets/react.svg'
 import './App.css'
 
 function App() {
+  let f;
+  const a = 0;
+
   const [count, setCount] = useState(0)
 
   return (
