@@ -2,15 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
 
-
-
 function App() {
-  const x = 0;
-
-  const y = 0;
-
-  let f;
-
   const [count, setCount] = useState(0)
 
   return (
