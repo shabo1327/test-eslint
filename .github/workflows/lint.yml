@@ -1,55 +1,49 @@
-# This is a basic workflow to help you get started with Actions
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# ESLint is a tool for identifying and reporting on patterns
+# found in ECMAScript/JavaScript code.
+# More details at https://github.com/eslint/eslint
+# and https://eslint.org
 
-name: CI
+name: ESLint
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
   pull_request:
+    # The branches below must be a subset of the branches above
     branches: [ "main" ]
+  schedule:
+    - cron: '39 15 * * 4'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  eslint:
+    name: Run eslint scanning
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    permissions:
+      contents: read
+      security-events: write
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: 'npm'
-      - name: Install Node Dependencies
-        run: npm ci
-        env:
-          CI: TRUE
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Test Code Linting
-        run: npm run lint
-      - name: Save Code Linting Report JSON
-        # npm script for ESLint
-        # eslint --output-file eslint_report.json --format json src
-        # See https://eslint.org/docs/user-guide/command-line-interface#options
-        run: npm run lint:report
-        # Continue to the next step even if this fails
+      - name: Install ESLint
+        run: |
+          npm install eslint@8.10.0
+          npm install @microsoft/eslint-formatter-sarif@2.1.7
+
+      - name: Run ESLint
+        run: npx eslint .
+          --config .eslintrc.js
+          --ext .js,.jsx,.ts,.tsx
+          --format @microsoft/eslint-formatter-sarif 
+          --output-file eslint-results.sarif
         continue-on-error: true
-      - name: Annotate Code Linting Results
-        uses: ataylorme/eslint-annotate-action@v2
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          report-json: "eslint_report.json"
-      - name: Upload ESLint report
-        uses: actions/upload-artifact@v2
-        with:
-          name: eslint_report.json
-          path: eslint_report.json
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
